@@ -1,0 +1,47 @@
+# Render Blueprint — deploys the whole system in one shot.
+# Dashboard → New → Blueprint → point at this repo.
+# After first deploy: open a shell on the web service and run
+#   npm run db:push && npm run db:seed
+# then sign in at /login and run: npm run preflight
+databases:
+  - name: internring-db
+    plan: basic-256mb
+
+services:
+  - type: web
+    name: internring-web
+    runtime: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase: { name: internring-db, property: connectionString }
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: CRON_SECRET
+        generateValue: true
+      - { key: NEXTAUTH_URL, sync: false }        # set to the public URL Render gives you
+      - { key: ALLOWED_EMAILS, sync: false }
+      - { key: GOOGLE_OAUTH_CLIENT_ID, sync: false }
+      - { key: GOOGLE_OAUTH_CLIENT_SECRET, sync: false }
+      - { key: GOOGLE_SHEET_ID, sync: false }
+      - { key: GOOGLE_SERVICE_ACCOUNT_EMAIL, sync: false }
+      - { key: GOOGLE_PRIVATE_KEY, sync: false }
+      - { key: ANTHROPIC_API_KEY, sync: false }
+
+  - type: worker
+    name: internring-worker
+    runtime: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm run worker
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase: { name: internring-db, property: connectionString }
+      - { key: GOOGLE_OAUTH_CLIENT_ID, sync: false }
+      - { key: GOOGLE_OAUTH_CLIENT_SECRET, sync: false }
+      - { key: GOOGLE_SHEET_ID, sync: false }
+      - { key: GOOGLE_SERVICE_ACCOUNT_EMAIL, sync: false }
+      - { key: GOOGLE_PRIVATE_KEY, sync: false }
+      - { key: ANTHROPIC_API_KEY, sync: false }

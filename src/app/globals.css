@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-paper text-ink font-body antialiased;
+}
+
+/* Ledger rule texture under the page header */
+.ledger-rules {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 27px,
+    #e9e6db 27px,
+    #e9e6db 28px
+  );
+}
+
+.card {
+  @apply bg-card border border-rule rounded-sm shadow-[0_1px_2px_rgba(27,42,65,0.06)];
+}
+
+/* Signature: the school ledger card's brass spine */
+.spine {
+  @apply border-l-4 border-brass;
+}
+
+.label {
+  @apply text-[11px] uppercase tracking-[0.14em] text-wait font-medium;
+}
+
+.btn {
+  @apply inline-flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-sm font-medium
+         border border-ink bg-ink text-paper hover:bg-inkSoft transition-colors
+         disabled:opacity-40 disabled:cursor-not-allowed;
+}
+.btn-quiet {
+  @apply bg-transparent text-ink hover:bg-ink/5;
+}
+.btn-brass {
+  @apply border-brass bg-brass text-paper hover:bg-[#86691f];
+}
+.btn-danger {
+  @apply border-alert bg-transparent text-alert hover:bg-alert hover:text-paper;
+}
+
+input, select, textarea {
+  @apply border border-rule rounded-sm bg-white px-2.5 py-1.5 text-sm text-ink
+         focus:outline-none focus:ring-1 focus:ring-brass focus:border-brass;
+}
+
+:focus-visible {
+  outline: 2px solid #9a7b2d;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "intern-ring-outreach-engine",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "worker": "tsx worker/index.ts",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "preflight": "tsx scripts/preflight.ts",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@auth/prisma-adapter": "^2.7.4",
+    "@prisma/client": "^5.22.0",
+    "cheerio": "^1.0.0",
+    "googleapis": "^144.0.0",
+    "next": "^14.2.21",
+    "next-auth": "^4.24.10",
+    "node-cron": "^3.0.3",
+    "papaparse": "^5.4.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/node-cron": "^3.0.11",
+    "@types/papaparse": "^5.3.15",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "prisma": "^5.22.0",
+    "tailwindcss": "^3.4.16",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
