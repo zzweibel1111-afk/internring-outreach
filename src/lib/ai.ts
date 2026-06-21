@@ -1,7 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-20250514";
+const MODEL_RESEARCH = process.env.ANTHROPIC_MODEL_RESEARCH ?? "claude-sonnet-4-6";
+const MODEL_CLASSIFY = process.env.ANTHROPIC_MODEL_CLASSIFY ?? "claude-haiku-4-5-20251001";
 
 function parseJson<T>(text: string): T {
   const clean = text.replace(/```json|```/g, "").trim();
@@ -54,7 +55,7 @@ PAGES:
 ${corpus}`;
 
   const res = await anthropic.messages.create({
-    model: MODEL,
+    model: MODEL_RESEARCH,
     max_tokens: 2000,
     messages: [{ role: "user", content: prompt }],
   });
@@ -113,7 +114,7 @@ Respond with ONLY this JSON, no prose:
 {"classification":"","sentiment":"POSITIVE|NEUTRAL|NEGATIVE","aiSummary":"","concerns":[],"nextSteps":"","threadSummary":"","referredContact":null}`;
 
   const res = await anthropic.messages.create({
-    model: MODEL,
+    model: MODEL_CLASSIFY,
     max_tokens: 1200,
     messages: [{ role: "user", content: prompt }],
   });
