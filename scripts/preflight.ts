@@ -78,7 +78,7 @@ async function main() {
     const Anthropic = (await import("@anthropic-ai/sdk")).default;
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     await client.messages.create({
-      model: process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-20250514",
+      model: process.env.ANTHROPIC_MODEL_RESEARCH ?? "claude-sonnet-4-6",
       max_tokens: 5,
       messages: [{ role: "user", content: "ping" }],
     });
