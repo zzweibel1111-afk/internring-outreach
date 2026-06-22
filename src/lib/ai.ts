@@ -82,7 +82,7 @@ Respond with ONLY the URL on its own line (e.g. https://www.example.org), nothin
     model: MODEL_RESEARCH,
     max_tokens: 300,
     messages: [{ role: "user", content: prompt }],
-    tools: [{ type: "web_search_20250305", name: "web_search" }],
+    tools: [{ type: "web_search_20250305", name: "web_search" }] as any,
   });
 
   const text = res.content.map((b) => ("text" in b ? b.text : "")).join("").trim();
@@ -150,3 +150,4 @@ Respond with ONLY this JSON, no prose:
   if (!CLASSIFICATIONS.includes(parsed.classification)) parsed.classification = "Replied";
   return parsed;
 }
+
