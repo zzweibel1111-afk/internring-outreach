@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+﻿import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const MODEL_RESEARCH = process.env.ANTHROPIC_MODEL_RESEARCH ?? "claude-sonnet-4-6";
@@ -11,7 +11,7 @@ function parseJson<T>(text: string): T {
   return JSON.parse(clean.slice(start, end + 1)) as T;
 }
 
-// ───────────────────────── Contact research ─────────────────────────
+// ----- Contact research -----
 
 export interface ExtractedContact {
   category: "HEAD_OF_SCHOOL" | "ADVANCEMENT" | "ALUMNI";
@@ -36,9 +36,9 @@ export async function extractContacts(
   const prompt = `You are extracting staff contacts for the private school "${schoolName}" from its own website pages below.
 
 Find ONE best person for each of these three categories:
-1. HEAD_OF_SCHOOL — Head of School, President, Headmaster, or Principal
-2. ADVANCEMENT — Director of Advancement / Development, Chief Advancement Officer, or closest equivalent
-3. ALUMNI — Director of Alumni Relations / Engagement / Affairs, or closest equivalent
+1. HEAD_OF_SCHOOL - Head of School, President, Headmaster, or Principal
+2. ADVANCEMENT - Director of Advancement / Development, Chief Advancement Officer, or closest equivalent
+3. ALUMNI - Director of Alumni Relations / Engagement / Affairs, or closest equivalent
 
 Rules:
 - Use ONLY information present in the pages. Never invent names, emails, or phone numbers.
@@ -64,7 +64,34 @@ ${corpus}`;
   return (parsed.contacts ?? []).filter((c) => c.name && c.category);
 }
 
-// ───────────────────────── Reply analysis ─────────────────────────
+// ----- Website discovery -----
+
+export async function findOfficialWebsite(
+  schoolName: string,
+  city?: string | null,
+  state?: string | null
+): Promise<string | null> {
+  const location = [city, state].filter(Boolean).join(", ");
+  const prompt = `Find the official homepage URL for the private school "${schoolName}"${
+    location ? ` located in ${location}` : ""
+  }. This must be the school's own .edu/.org/.com site - NOT niche.com, not a directory listing, not a social media page.
+
+Respond with ONLY the URL on its own line (e.g. https://www.example.org), nothing else. If you genuinely cannot find an official site, respond with exactly: NONE`;
+
+  const res = await anthropic.messages.create({
+    model: MODEL_RESEARCH,
+    max_tokens: 300,
+    messages: [{ role: "user", content: prompt }],
+    tools: [{ type: "web_search_20250305", name: "web_search" }],
+  });
+
+  const text = res.content.map((b) => ("text" in b ? b.text : "")).join("").trim();
+  const match = text.match(/https?:\/\/[^\s"]+/);
+  if (!match) return null;
+  return match[0].replace(/[).,]+$/, ""); // strip trailing punctuation
+}
+
+// ----- Reply analysis -----
 
 export const CLASSIFICATIONS = [
   "Replied",

@@ -1,6 +1,6 @@
-import * as cheerio from "cheerio";
+﻿import * as cheerio from "cheerio";
 import { prisma } from "./db";
-import { extractContacts } from "./ai";
+import { extractContacts, findOfficialWebsite } from "./ai";
 import { timeZoneForState } from "./timezone";
 import { reviewModeOn } from "./settings";
 import { createInitialDraft } from "./drafts";
@@ -32,7 +32,7 @@ async function fetchPage(url: string): Promise<string | null> {
 function pageText(html: string): string {
   const $ = cheerio.load(html);
   $("script, style, noscript, svg, nav, footer").remove();
-  // mailto links often carry the only machine-readable email — surface them
+  // mailto links often carry the only machine-readable email â€” surface them
   $("a[href^='mailto:']").each((_, el) => {
     const addr = ($(el).attr("href") ?? "").replace("mailto:", "").split("?")[0];
     $(el).append(` <${addr}> `);
@@ -81,8 +81,8 @@ function normalizeWebsite(site?: string | null): string | null {
 /**
  * Researches one school: crawls its public site (homepage + up to 6 staff/
  * leadership/advancement/alumni pages), extracts the three required contacts
- * with the AI layer, and either queues them for Zach's verification or — when
- * review mode is off — auto-approves and creates the Gmail draft.
+ * with the AI layer, and either queues them for Zach's verification or â€” when
+ * review mode is off â€” auto-approves and creates the Gmail draft.
  */
 export async function researchSchool(schoolId: string): Promise<void> {
   const school = await prisma.school.findUniqueOrThrow({ where: { id: schoolId } });
@@ -92,12 +92,19 @@ export async function researchSchool(schoolId: string): Promise<void> {
   });
 
   try {
-    // Time zone — required by the spec, derived from state with a UI override.
+    // Time zone â€” required by the spec, derived from state with a UI override.
     const tz = school.timeZone ?? timeZoneForState(school.state);
     if (tz) await prisma.school.update({ where: { id: schoolId }, data: { timeZone: tz } });
 
-    const homepage = normalizeWebsite(school.website);
-    if (!homepage) throw new Error("No website on record — add one on the school page and retry.");
+    let homepage = normalizeWebsite(school.website);
+    if (!homepage) {
+      const discovered = await findOfficialWebsite(school.name, school.city, school.state);
+      homepage = normalizeWebsite(discovered);
+      if (homepage) {
+        await prisma.school.update({ where: { id: schoolId }, data: { website: homepage } });
+      }
+    }
+    if (!homepage) throw new Error("No website on record and could not find one online - add manually and retry.");
 
     const homeHtml = await fetchPage(homepage);
     if (!homeHtml) throw new Error(`Could not load ${homepage} (blocked or down).`);
@@ -162,3 +169,4 @@ export async function processResearchQueue(batch = 3): Promise<number> {
   for (const s of queued) await researchSchool(s.id);
   return queued.length;
 }
+

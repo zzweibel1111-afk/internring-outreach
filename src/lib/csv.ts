@@ -1,4 +1,4 @@
-import Papa from "papaparse";
+﻿import Papa from "papaparse";
 
 export interface CsvSchool {
   name: string;
@@ -12,6 +12,7 @@ export interface CsvSchool {
 function pick(row: Record<string, string>, ...needles: string[]): string | undefined {
   for (const key of Object.keys(row)) {
     const k = key.toLowerCase();
+    if (k.includes("niche") && !needles.includes("niche")) continue;
     if (needles.some((n) => k.includes(n))) {
       const v = (row[key] ?? "").trim();
       if (v) return v;
